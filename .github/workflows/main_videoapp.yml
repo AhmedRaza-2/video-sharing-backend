@@ -1,8 +1,8 @@
 name: Build and deploy Python app to Azure Web App - videoapp
 
-# ─── MUST add at the root so every job gets OIDC ───────────────────────────────
+# ─── MUST be at the very top ────────────────────────────────────────────────
 permissions:
-  id-token: write   # <— allows GitHub to mint an OIDC token
+  id-token: write    # allows OIDC tokens
   contents: read
 
 on:
@@ -19,20 +19,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python version
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Create and activate virtual environment
+      - name: Create and activate venv
         run: |
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install dependencies
+      - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Upload artifact for deployment
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: python-app
@@ -45,21 +45,20 @@ jobs:
     needs: build
 
     steps:
-      - name: Download build artifact
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      - name: Dump OIDC info (debug)
+      - name: Debug OIDC token issuance
         shell: bash
         run: |
-          echo "OIDC URL:  $ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "OIDC TOKEN (truncated): ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:20}..."
-          # try fetching the actual JWT
-          curl -s \
-            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL" \
-            || echo "❌ failed to get ID token"
+          echo "== ACTIONS_ID_TOKEN_REQUEST_URL =="
+          echo "$ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "== ACTIONS_ID_TOKEN_REQUEST_TOKEN (first 100 chars) =="
+          echo "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:100}..."
+          # fail early if no token
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || (echo "✖️ No ID token!" && exit 1)
 
       - name: Login to Azure using OIDC
         uses: azure/login@v1
@@ -69,11 +68,10 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
           audience: api://AzureADTokenExchange
 
-      - name: Verify Az CLI context
-        run: |
-          az account show
+      - name: Verify Azure login
+        run: az account show
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'videoapp'
