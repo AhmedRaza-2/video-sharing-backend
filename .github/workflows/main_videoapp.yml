@@ -1,13 +1,13 @@
 name: Build and deploy Python app to Azure Web App - videoapp
 
-# ─── Root-level permissions ENABLE OIDC issuance ──────────────────────────────
 permissions:
   id-token: write
   contents: read
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -51,17 +51,13 @@ jobs:
       - name: Debug OIDC token issuance
         shell: bash
         run: |
-          echo "=== REQUEST URL ==="
-          echo "$ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "=== TOKEN (first 200 chars) ==="
-          echo "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:200}"
-          # fail if empty
+          echo "== URL: $ACTIONS_ID_TOKEN_REQUEST_URL =="
+          echo "== TOKEN (first 200 chars): ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:200}… =="
           test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || (echo "✖️ No ID token!" && exit 1)
 
-      - name: Login to Azure via OIDC (explicit)
-        uses: azure/login@v1.4.3
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
         with:
-          auth-type: oidc
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
@@ -70,7 +66,7 @@ jobs:
       - name: Verify Azure login
         run: az account show
 
-      - name: Deploy to Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'videoapp'
