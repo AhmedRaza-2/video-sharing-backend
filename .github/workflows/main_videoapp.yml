@@ -1,26 +1,24 @@
 name: Build and deploy Python app to Azure Web App - videoapp
 
-# ─── MUST be at the very top ────────────────────────────────────────────────
+# ─── Root-level permissions ENABLE OIDC issuance ──────────────────────────────
 permissions:
-  id-token: write    # allows OIDC tokens
+  id-token: write
   contents: read
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        name: Checkout code
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
+        name: Set up Python
         with:
           python-version: '3.11'
 
@@ -29,11 +27,11 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install deps
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
+        name: Upload artifact
         with:
           name: python-app
           path: |
@@ -45,24 +43,25 @@ jobs:
     needs: build
 
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
+        name: Download artifact
         with:
           name: python-app
 
       - name: Debug OIDC token issuance
         shell: bash
         run: |
-          echo "== ACTIONS_ID_TOKEN_REQUEST_URL =="
+          echo "=== REQUEST URL ==="
           echo "$ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "== ACTIONS_ID_TOKEN_REQUEST_TOKEN (first 100 chars) =="
-          echo "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:100}..."
-          # fail early if no token
+          echo "=== TOKEN (first 200 chars) ==="
+          echo "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:200}"
+          # fail if empty
           test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || (echo "✖️ No ID token!" && exit 1)
 
-      - name: Login to Azure using OIDC
-        uses: azure/login@v1
+      - name: Login to Azure via OIDC (explicit)
+        uses: azure/login@v1.4.3
         with:
+          auth-type: oidc
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
