@@ -55,12 +55,12 @@ jobs:
           name: python-app
 
       - name: Login to Azure using OIDC
-        uses: azure/login@v2
+        uses: azure/login@v1.4.3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-          auth-type: ID_TOKEN
+          auth-type: IDENTITY 
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -68,3 +68,4 @@ jobs:
         with:
           app-name: 'videoapp'
           slot-name: 'Production'
+
