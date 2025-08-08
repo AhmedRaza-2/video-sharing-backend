@@ -60,7 +60,6 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-          
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -68,5 +67,3 @@ jobs:
         with:
           app-name: 'videoapp'
           slot-name: 'Production'
-
-
