@@ -127,5 +127,7 @@ def upload():
 def view_videos():
     return render_template('viewer.html', videos=videos)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+import os
+
+port = int(os.environ.get("PORT", 8000))  # Azure will set PORT
+app.run(host="0.0.0.0", port=port, debug=True)
