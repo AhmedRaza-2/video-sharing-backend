@@ -1,38 +1,26 @@
-# .github/workflows/main_videoapp.yml
-name: Build & Deploy Python App to Azure Web App - videoapp
+name: Build & Deploy to Azure Web App - videoapp
 
 permissions:
-  id-token: write      # required for OIDC
-  contents: read       # to pull your code
+  id-token: write    # MUST be at the top level
+  contents: read
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Create and activate venv
-        run: |
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: |
           python -m venv venv
           source venv/bin/activate
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - run: pip install -r requirements.txt
+      - uses: actions/upload-artifact@v4
         with:
           name: python-app
           path: |
@@ -43,32 +31,27 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: python-app
+      - uses: actions/download-artifact@v4
+        with: { name: python-app }
 
-      - name: Debug OIDC token issuance
+      - name: Debug OIDC issuance
         shell: bash
         run: |
-          echo "== URL: $ACTIONS_ID_TOKEN_REQUEST_URL =="
-          echo "== TOKEN (first 200 chars): ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:200}… =="
-          test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || (echo "✖️ No ID token!" && exit 1)
+          echo "URL   : $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "TOKEN : ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:0:100}..."
+          test -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" || exit 1
 
-      - name: Login to Azure via OIDC
-        uses: azure/login@v2
+      - uses: azure/login@v2
+        name: Login via OIDC
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-          audience: api://AzureADTokenExchange
+          client-id:        ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id:        ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id:  ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+          audience:         api://AzureADTokenExchange
 
-      - name: Verify Azure login
-        run: az account show
+      - run: az account show
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      - uses: azure/webapps-deploy@v3
         with:
           app-name: videoapp
           slot-name: Production
-          package: python-app
