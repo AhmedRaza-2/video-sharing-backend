@@ -5,7 +5,7 @@ import cloudinary
 import cloudinary.uploader
 
 app = Flask(__name__)
-app.secret_key = 'super_secure_key_123'  # 🔐 Replace with a strong secret
+app.secret_key = 'super_secure_key_123'  # 🔐 Replace with a stong secret
 
 # 🔐 Firebase Configuration
 firebase_config = {
