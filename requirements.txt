@@ -27,9 +27,9 @@ pyparsing==3.2.3
 pyrebase4==4.8.0
 python-jwt==4.1.0
 requests==2.32.4
-requests-toolbelt==0.10.1
+requests-toolbelt==1.0.0
 rsa==4.9.1
 six==1.17.0
 typing-extensions==4.14.1
-urllib3==1.26.20
+urllib3==2.5.0
 werkzeug==3.1.3
