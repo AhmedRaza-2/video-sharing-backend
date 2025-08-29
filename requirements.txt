@@ -1,19 +1,45 @@
-# Core framework
-Flask==3.0.3
+# --- Core framework ---
+Flask==3.1.1
+Flask-Login==0.6.3
 gunicorn==23.0.0
 
-# Firebase / Pyrebase4
+# --- Firebase / Pyrebase ---
 pyrebase4==4.8.0
 requests==2.32.3
 requests-toolbelt==0.10.1
-urllib3==1.26.20   # keep below v2 to avoid old pyrebase issues
+urllib3==1.26.20   # pin for pyrebase compatibility
 
-# HTML parsing / scraping (if your app uses them)
-beautifulsoup4==4.12.3
-lxml==5.2.2
+# --- Security & Auth ---
+cryptography==45.0.6
+python-jwt==4.1.0
+jwcrypto==1.5.6
+rsa==4.9.1
+oauth2client==4.1.3
 
-# Environment management
-python-dotenv==1.0.1
+# --- Google / Cloud ---
+gcloud==0.18.3
+googleapis-common-protos==1.70.0
+httplib2==0.22.0
+protobuf==4.25.5
+cloudinary==1.44.1
 
-# Optional utils (add/remove as per your app code)
-pytz==2025.1
+# --- Web helpers ---
+blinker==1.9.0
+click==8.2.1
+colorama==0.4.6
+itsdangerous==2.2.0
+jinja2==3.1.6
+markupsafe==3.0.2
+werkzeug==3.1.3
+
+# --- Parsing / utils ---
+pyasn1==0.6.1
+pyasn1-modules==0.4.2
+pycparser==2.22
+pycryptodome==3.23.0
+pyparsing==3.2.3
+six==1.17.0
+typing-extensions==4.14.1
+idna==3.10
+certifi==2025.8.3
+charset-normalizer==3.4.2
