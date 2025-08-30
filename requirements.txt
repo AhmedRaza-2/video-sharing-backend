@@ -31,4 +31,4 @@ typing-extensions==4.14.1
 idna==3.10
 certifi==2025.8.3
 charset-normalizer==3.4.2
-urllib3>=1.26.14,<2  # updated version to satisfy pyrebase & cloudinary
+urllib3==1.26.6
